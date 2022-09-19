@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zongzhaobin.mybatis.mapper.DynamicSQLMapper">
+    <insert id="insertMoreEmp">
+        insert into t_emp values
+        <foreach collection="emps" item="emp" separator=",">
+            (null,#{emp.empName},#{emp.age},#{emp.gender},null)
+        </foreach>
+    </insert>
+
+    <!--使用In方式批量删除 delete from t_emp where emp_id in ( ? , ? )
+    <delete id="deleteMoreEmp">
+        delete from t_emp where emp_id in
+        <foreach collection="empIds" item="empId" separator="," open="(" close=")">
+            #{empId}
+        </foreach>
+        -->
+    <!--使用Or进行批量删除 delete from t_emp where emp_id = ? or emp_id = ? -->
+    <delete id="deleteMoreEmp">
+        delete from t_emp where
+        <foreach collection="empIds" item="empId" separator="or">
+             emp_id = #{empId}
+        </foreach>
+    </delete>
+
+    <!--恒成立的方式
+    <select id="getEmpByCondition" resultType="com.zongzhaobin.Emp">
+        select * from t_emp where 1=1
+        <if test="empName != null and empName != ''" >
+            and emp_name = #{empName}
+        </if>
+        <if test="age != null and age != ''">
+            and age = #{age}
+        </if>
+        <if test="gender != null and gender != ''">
+            and gender = #{gender}
+        </if>
+    </select>
+    -->
+    <!--动态生成where关键字
+    <select id="getEmpByCondition" resultType="com.zongzhaobin.Emp">
+        select * from t_emp
+        <where>
+        <if test="empName != null and empName != ''" >
+                emp_name = #{empName}
+        </if>
+        <if test="age != null and age != ''">
+            and age = #{age}
+        </if>
+        <if test="gender != null and gender != ''">
+            and gender = #{gender}
+        </if>
+        </where>
+    </select>
+    -->
+
+    <!--在sql前面或后面增加删除关键字-->
+    <select id="getEmpByCondition" resultType="com.zongzhaobin.Emp">
+        select * from t_emp
+        <trim prefix="where" suffixOverrides="and" prefixOverrides="and">
+            <if test="empName != null and empName != ''" >
+                emp_name = #{empName}
+            </if>
+            <if test="age != null and age != ''">
+                and age = #{age}
+            </if>
+            <if test="gender != null and gender != ''">
+                and gender = #{gender}
+            </if>
+        </trim>
+    </select>
+
+
+    <select id="getEmpByChoose" resultType="com.zongzhaobin.Emp">
+        select * from t_emp
+        <where>
+        <choose>
+            <when test="empName != null and empName != ''" >
+                emp_name = #{empName}
+            </when>
+            <when test="age != null and age != ''">
+                age = #{age}
+            </when>
+            <when test="gender != null and gender != ''">
+                gender = #{gender}
+            </when>
+        </choose>
+        </where>
+    </select>
+</mapper>
